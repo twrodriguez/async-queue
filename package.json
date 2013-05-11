@@ -1,0 +1,21 @@
+{
+  "author": {
+    "name": "Tim Rodriguez",
+    "email": "tw.rodriguez@gmail.com",
+    "url": "http://www.twrodriguez.com"
+  },
+  "license": "Simplified BSD",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/twrodriguez/asyncQueue.js.git"
+  },
+  "engines": {
+    "node": ">= 0.4.12"
+  },
+  "private": true,
+  "name": "asyncQueue",
+  "version": "1.0.0",
+  "dependencies": {
+    "JsEnv": ">= 1.0.0"
+  }
+}
