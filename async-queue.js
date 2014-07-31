@@ -5,6 +5,7 @@
 (function() {
   "use strict";
   var root = this.window || this.global;
+  var internals = {};
 
   //
   // Enable the passage of the 'this' object through the JavaScript timers
@@ -12,7 +13,7 @@
   if (root.setTimeout) {
     var __nativeST__ = root.setTimeout;
 
-    root.setTimeout = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
+    internals.setTimeout = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
       var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
       return __nativeST__((vCallback instanceof Function ? function() {
         vCallback.apply(oThis, aArgs);
@@ -23,7 +24,7 @@
   if (root.setInterval) {
     var __nativeSI__ = root.setInterval;
 
-    root.setInterval = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
+    internals.setInterval = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
       var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
       return __nativeSI__((vCallback instanceof Function ? function() {
         vCallback.apply(oThis, aArgs);
@@ -32,7 +33,7 @@
   }
 
   // Asynchronous Queue Object
-  var asyncQueue = function() {
+  var AsyncQueue = function() {
     var that = this;
     function progressFn(ret, sequential) {
       that._numToComplete -= 1;
@@ -66,15 +67,22 @@
         enumerable: false,
         configurable: false
       });
+      Object.defineProperty(this, '_started', {
+        value: false,
+        writable: true,
+        enumerable: false,
+        configurable: false
+      });
     } catch (ignore) {
       this._valArray = [];
       this._queue = [];
       this._numToComplete = 0;
       this._progress = progressFn;
+      this._started = false;
     }
   };
 
-  asyncQueue.prototype = {
+  AsyncQueue.prototype = {
     enqueue: function(that, opts) {
       opts = opts || {};
       var aArgs = Array.prototype.slice.call(opts.args || []),
@@ -97,9 +105,10 @@
       return this._queue.length;
     },
     pop: function(sequential) {
-      setTimeout(this._queue.shift(), 0, sequential);
+      internals.setTimeout.call(this, this._queue.shift(), 0, sequential);
     },
     start: function(sequential) {
+      this._started = true;
       if (sequential) {
         this.pop(true);
       } else {
@@ -107,6 +116,12 @@
         while (--l >= 0) { this.pop(); }
       }
     },
+    finished: function() {
+      return !!(this._started) && (this._queue.length === 0);
+    },
+    started: function() {
+      return !!(this._started);
+    }
   };
 
   //
@@ -115,12 +130,12 @@
 
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = asyncQueue;
+      exports = module.exports = AsyncQueue;
     }
-    exports.asyncQueue = asyncQueue;
+    exports.AsyncQueue = AsyncQueue;
   } else if (root.window) {
-    root.window.asyncQueue = asyncQueue;
+    root.window.AsyncQueue = AsyncQueue;
   } else {
-    this.asyncQueue = asyncQueue;
+    this.AsyncQueue = AsyncQueue;
   }
 }).call(this);
