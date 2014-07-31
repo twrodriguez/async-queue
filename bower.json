@@ -1,0 +1,23 @@
+{
+  "name": "async-queue",
+  "version": "0.1.0",
+  "homepage": "https://github.com/twrodriguez/async-queue",
+  "authors": [
+    "Tim Rodriguez <tw.rodriguez@gmail.com>"
+  ],
+  "description": "Asynchronous queue manager",
+  "main": [
+    "async-queue.min.js"
+  ],
+  "ignore": [
+    "bower_components",
+    "node_modules",
+    ".gitignore",
+    "bower.json",
+    "package.json",
+    "REQUIRED_FILES",
+    "README.md"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

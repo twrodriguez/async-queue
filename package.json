@@ -7,15 +7,12 @@
   "license": "Simplified BSD",
   "repository": {
     "type": "git",
-    "url": "https://github.com/twrodriguez/asyncQueue.js.git"
+    "url": "https://github.com/twrodriguez/async-queue.git"
   },
   "engines": {
     "node": ">= 0.4.12"
   },
-  "private": true,
-  "name": "asyncQueue",
-  "version": "1.0.0",
-  "dependencies": {
-    "JsEnv": ">= 1.0.0"
-  }
+  "name": "async-queue",
+  "version": "0.1.0",
+  "dependencies": {}
 }

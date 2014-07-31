@@ -2,17 +2,9 @@
 * Asynchronous Queue *
 \********************/
 
-(function(undefined) {
+(function() {
   "use strict";
-  //
-  // Environment Check
-  //
-  // root == window **Client-side**, root == global **Server-side**
-  if (typeof(JsEnv) === "undefined" && typeof(require) === "function") { require("JsEnv").exportGlobally(); }
-
-  var root = JsEnv.globalScope,
-      window = root.window,
-      includedModules = {};
+  var root = this.window || this.global;
 
   //
   // Enable the passage of the 'this' object through the JavaScript timers
@@ -22,9 +14,9 @@
 
     root.setTimeout = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
       var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
-      return __nativeST__((vCallback instanceof Function ? (function () {
+      return __nativeST__((vCallback instanceof Function ? function() {
         vCallback.apply(oThis, aArgs);
-      }) : (vCallback)), nDelay);
+      } : vCallback), nDelay);
     };
   }
 
@@ -33,44 +25,54 @@
 
     root.setInterval = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
       var oThis = this, aArgs = Array.prototype.slice.call(arguments, 2);
-      return __nativeSI__((vCallback instanceof Function ? (function () {
+      return __nativeSI__((vCallback instanceof Function ? function() {
         vCallback.apply(oThis, aArgs);
-      }) : (vCallback)), nDelay);
+      } : vCallback), nDelay);
     };
   }
 
   // Asynchronous Queue Object
   var asyncQueue = function() {
-    Object.defineProperty(this, '_valArray', {
-      value: new Array(),
-      writable: false,
-      enumerable: false,
-      configurable: false
-    });
-    Object.defineProperty(this, '_queue', {
-      value: new Array(),
-      writable: false,
-      enumerable: false,
-      configurable: false
-    });
-    Object.defineProperty(this, '_numToComplete', {
-      value: 0,
-      writable: true,
-      enumerable: false,
-      configurable: false
-    });
-    Object.defineProperty(this, '_progress', {
-      value: function(ret, sequential) {
-        this._numToComplete -= 1;
-        if (this.progress) { this.progress(ret); }
-        if (this._numToComplete <= 0 && this.done) { this.done(this._valArray); }
-        if (sequential && this._queue.length > 0) { this.pop(sequential); }
-      },
-      writable: false,
-      enumerable: false,
-      configurable: false
-    });
-  }
+    var that = this;
+    function progressFn(ret, sequential) {
+      that._numToComplete -= 1;
+      if (that.progress) { that.progress(ret); }
+      if (that._numToComplete <= 0 && that.done) { that.done(that._valArray); }
+      if (sequential && that._queue.length > 0) { that.pop(sequential); }
+    }
+
+    try {
+      Object.defineProperty(this, '_valArray', {
+        value: [],
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+      Object.defineProperty(this, '_queue', {
+        value: [],
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+      Object.defineProperty(this, '_numToComplete', {
+        value: 0,
+        writable: true,
+        enumerable: false,
+        configurable: false
+      });
+      Object.defineProperty(this, '_progress', {
+        value: progressFn,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+    } catch (ignore) {
+      this._valArray = [];
+      this._queue = [];
+      this._numToComplete = 0;
+      this._progress = progressFn;
+    }
+  };
 
   asyncQueue.prototype = {
     enqueue: function(that, opts) {
@@ -105,7 +107,7 @@
         while (--l >= 0) { this.pop(); }
       }
     },
-  }
+  };
 
   //
   // Export
@@ -116,8 +118,8 @@
       exports = module.exports = asyncQueue;
     }
     exports.asyncQueue = asyncQueue;
-  } else if (window) {
-    window.asyncQueue = asyncQueue;
+  } else if (root.window) {
+    root.window.asyncQueue = asyncQueue;
   } else {
     this.asyncQueue = asyncQueue;
   }
