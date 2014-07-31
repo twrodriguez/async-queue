@@ -101,7 +101,11 @@
           qThis._progress(ret, sequential);
         }
       });
-      this._numToComplete += 1;
+      if (this.finished()) {
+        this.pop();
+      } else {
+        this._numToComplete += 1;
+      }
       return this._queue.length;
     },
     pop: function(sequential) {
